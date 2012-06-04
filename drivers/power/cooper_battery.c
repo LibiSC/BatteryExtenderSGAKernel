@@ -1038,7 +1038,7 @@ extern int fsa9280_i2c_write(unsigned char u_addr, unsigned char u_data);
 #define BATT_FULL_VOLT		4200
 #define BATT_RECHAR_VOLT	4140
 
-#define BATT_LOW_ADC		2015
+#define BATT_LOW_ADC		2115
 #define BATT_LEVEL1_ADC	2606
 #define BATT_LEVEL2_ADC	2838
 #define BATT_LEVEL3_ADC	2908
