@@ -41,40 +41,23 @@ static int __power_supply_changed_work(struct device *dev, void *data)
 
 static void power_supply_changed_work(struct work_struct *work)
 {
-	unsigned long flags;
 	struct power_supply *psy = container_of(work, struct power_supply,
 						changed_work);
 
 	dev_dbg(psy->dev, "%s\n", __func__);
 
-	spin_lock_irqsave(&psy->changed_lock, flags);
-	if (psy->changed) {
-		psy->changed = false;
-		spin_unlock_irqrestore(&psy->changed_lock, flags);
+	class_for_each_device(power_supply_class, NULL, psy,
+			      __power_supply_changed_work);
 
-		class_for_each_device(power_supply_class, NULL, psy,
-				      __power_supply_changed_work);
+	power_supply_update_leds(psy);
 
-		power_supply_update_leds(psy);
-
-		kobject_uevent(&psy->dev->kobj, KOBJ_CHANGE);
-		spin_lock_irqsave(&psy->changed_lock, flags);
-	}
-	if (!psy->changed)
-		wake_unlock(&psy->work_wake_lock);
-	spin_unlock_irqrestore(&psy->changed_lock, flags);
+	kobject_uevent(&psy->dev->kobj, KOBJ_CHANGE);
 }
 
 void power_supply_changed(struct power_supply *psy)
 {
-	unsigned long flags;
-
 	dev_dbg(psy->dev, "%s\n", __func__);
 
-	spin_lock_irqsave(&psy->changed_lock, flags);
-	psy->changed = true;
-	wake_lock(&psy->work_wake_lock);
-	spin_unlock_irqrestore(&psy->changed_lock, flags);
 	schedule_work(&psy->changed_work);
 }
 EXPORT_SYMBOL_GPL(power_supply_changed);
@@ -115,7 +98,9 @@ static int __power_supply_is_system_supplied(struct device *dev, void *data)
 {
 	union power_supply_propval ret = {0,};
 	struct power_supply *psy = dev_get_drvdata(dev);
+	unsigned int *count = data;
 
+	(*count)++;
 	if (psy->type != POWER_SUPPLY_TYPE_BATTERY) {
 		if (psy->get_property(psy, POWER_SUPPLY_PROP_ONLINE, &ret))
 			return 0;
@@ -128,9 +113,17 @@ static int __power_supply_is_system_supplied(struct device *dev, void *data)
 int power_supply_is_system_supplied(void)
 {
 	int error;
+	unsigned int count = 0;
 
-	error = class_for_each_device(power_supply_class, NULL, NULL,
+	error = class_for_each_device(power_supply_class, NULL, &count,
 				      __power_supply_is_system_supplied);
+
+	/*
+	 * If no power class device was found at all, most probably we are
+	 * running on a desktop system, so assume we are on mains power.
+	 */
+	if (count == 0)
+		return 1;
 
 	return error;
 }
@@ -188,6 +181,8 @@ int power_supply_register(struct device *parent, struct power_supply *psy)
 	dev_set_drvdata(dev, psy);
 	psy->dev = dev;
 
+	INIT_WORK(&psy->changed_work, power_supply_changed_work);
+
 	rc = kobject_set_name(&dev->kobj, "%s", psy->name);
 	if (rc)
 		goto kobject_set_name_failed;
@@ -195,10 +190,6 @@ int power_supply_register(struct device *parent, struct power_supply *psy)
 	rc = device_add(dev);
 	if (rc)
 		goto device_add_failed;
-
-	INIT_WORK(&psy->changed_work, power_supply_changed_work);
-	spin_lock_init(&psy->changed_lock);
-	wake_lock_init(&psy->work_wake_lock, WAKE_LOCK_SUSPEND, "power-supply");
 
 	rc = power_supply_create_triggers(psy);
 	if (rc)
@@ -209,11 +200,10 @@ int power_supply_register(struct device *parent, struct power_supply *psy)
 	goto success;
 
 create_triggers_failed:
-	wake_lock_destroy(&psy->work_wake_lock);
-	device_unregister(psy->dev);
+	device_del(dev);
 kobject_set_name_failed:
 device_add_failed:
-	kfree(dev);
+	put_device(dev);
 success:
 	return rc;
 }
@@ -221,9 +211,8 @@ EXPORT_SYMBOL_GPL(power_supply_register);
 
 void power_supply_unregister(struct power_supply *psy)
 {
-	flush_scheduled_work();
+	cancel_work_sync(&psy->changed_work);
 	power_supply_remove_triggers(psy);
-	wake_lock_destroy(&psy->work_wake_lock);
 	device_unregister(psy->dev);
 }
 EXPORT_SYMBOL_GPL(power_supply_unregister);

@@ -122,7 +122,7 @@
 #define ONCRPC_CHARGER_API_VERSIONS_PROC 	0xffffffff
 #define CHARGER_API_VERSION  			0x00010003
 #define DEFAULT_CHARGER_API_VERSION		0x00010001
-#define BATT_RPC_TIMEOUT    500	/* 1 sec */
+#define BATT_RPC_TIMEOUT    5000	/* 1 sec */
 #define INVALID_BATT_HANDLE    -1
 #define RPC_TYPE_REQ     0
 #define RPC_TYPE_REPLY   1
@@ -132,7 +132,7 @@
 #define CLEANUP_EVENT		(1UL << 2)
 
 #ifdef MAX8899_CHARGER
-#define BATT_CHECK_INTERVAL	( 1 * HZ ) // every 10 sec
+#define BATT_CHECK_INTERVAL	( 5 * HZ ) // every 10 sec
 
 // proc comm re-definition
 #define SMEM_PROC_COMM_CHARGING_INFO	PCOM_OEM_CHARGING_INFO
@@ -489,7 +489,7 @@ static int dwChargingState=CHARGING_STATE_INIT_BATTERY;
 
 //average cnt
 static int AverageSample=0; 
-static unsigned int cache_time = 1000;
+static unsigned int cache_time = 500;
 static int bSetTimer = 0;
 
 static int Pre_batt_capacity = 100;
@@ -977,7 +977,7 @@ static int msm_batt_power_get_property(struct power_supply *psy,
 		val->intval = msm_batt_info.voltage_min_design;
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
-		val->intval = msm_batt_info.battery_voltage*1000;
+		val->intval = msm_batt_info.battery_voltage*10;
 		break;
 	case POWER_SUPPLY_PROP_CAPACITY:
 		val->intval = msm_batt_info.batt_capacity;
@@ -1037,25 +1037,25 @@ extern int fsa9280_i2c_write(unsigned char u_addr, unsigned char u_data);
 #define FSA_DTYPE1 	0x0A
 #define FSA_DTYPE2 	0x0B
 
-#define BATT_LOW_VOLT		3400
-#define BATT_LEVEL1_VOLT	3550
-#define BATT_LEVEL2_VOLT	3690
-#define BATT_LEVEL3_VOLT	3730
-#define BATT_LEVEL4_VOLT	3770
-#define BATT_LEVEL5_VOLT	3850
-#define BATT_LEVEL6_VOLT	3950
-#define BATT_FULL_VOLT		4200
-#define BATT_RECHAR_VOLT	4140
+#define BATT_LOW_VOLT		340000
+#define BATT_LEVEL1_VOLT	355000
+#define BATT_LEVEL2_VOLT	369000
+#define BATT_LEVEL3_VOLT	373000
+#define BATT_LEVEL4_VOLT	377000
+#define BATT_LEVEL5_VOLT	385000
+#define BATT_LEVEL6_VOLT	395000
+#define BATT_FULL_VOLT		420000
+#define BATT_RECHAR_VOLT	414000
 
 #define BATT_LOW_ADC		2300
-#define BATT_LEVEL1_ADC	2506
-#define BATT_LEVEL2_ADC	2738
-#define BATT_LEVEL3_ADC	2808
+#define BATT_LEVEL1_ADC	2606
+#define BATT_LEVEL2_ADC	2838
+#define BATT_LEVEL3_ADC	2908
 #define BATT_LEVEL4_ADC	2972
-#define BATT_LEVEL5_ADC	3027
-#define BATT_LEVEL6_ADC	3181
+#define BATT_LEVEL5_ADC	3127
+#define BATT_LEVEL6_ADC	3281
 #define BATT_FULL_ADC		3500
-#define BATT_RECHR_ADC		3350
+#define BATT_RECHR_ADC		3450
 
 #define BATT_BUF		10
 #define BATT_THR		30
@@ -1220,7 +1220,7 @@ int calculate_batt_voltage(int vbatt_adc)
 	static int prevVal = 0;
 	int i = 0;
 
-
+#ifdef __CONTROL_CHARGING_SUDDEN_LEVEL_UP_
 	if(!prevVal)
 	prevVal = vbatt_adc;
 
@@ -1250,7 +1250,7 @@ int calculate_batt_voltage(int vbatt_adc)
 		}
 	}
 	prevVal = vbatt_adc;
-
+#endif	
 	
 	//printk("[Battery] %s : vbatt_adc %d \n", __func__, vbatt_adc);
 	
@@ -1327,9 +1327,10 @@ static int charging_control(charging_ctrl on)
 
 static void msm_batt_update(void)
 {
+	power_supply_changed(&msm_psy_batt);
 	power_supply_changed(&msm_psy_ac);
 	power_supply_changed(&msm_psy_usb);
-	power_supply_changed(&msm_psy_batt);
+	
 }
 
 
@@ -1541,7 +1542,7 @@ int CheckTemperature(int avg_temp, int oldTempInterrupt)
 
 int IsRechargingValue(int avg_level)
 {
-	if(avg_level <= 3600)
+	if(avg_level <= 360000)
 		return 1;
 	else return 0;
 }
@@ -1569,7 +1570,7 @@ int get_charging_status(void)
 	if(event_flag & CHG_CONNECT )	gChg_connect = 1;
 	else gChg_connect = 0;
 		
-	if ((event_flag & FULL_CHG_MASK) || msm_batt_info.battery_level>=3660) gFull_chg = 1;
+	if ((event_flag & FULL_CHG_MASK) || msm_batt_info.battery_level>=366000) gFull_chg = 1;
 	else gFull_chg = 0;
 		
 	if(event_flag & TIMER_MASK ) gTimer = 1;
@@ -1672,9 +1673,9 @@ static int check_charging_status(int oldChargingState)
 						{
 							//printk("[Battery] %s :  TA full charged \n", __func__);
 							 
-if (msm_batt_info.battery_level>=3660){
+//if (msm_batt_info.battery_level>=3660){
 dwChargingState=CHARGING_STATE_TA_FULL_CHARGED;
-}
+//}
 						}
 					}
 					else 
@@ -1824,17 +1825,17 @@ if (msm_batt_info.battery_level>=3800){
 				
 			case CHARGING_STATE_TA_FULL_CHARGED:
 
-				if (msm_batt_info.battery_level>=3660){
+				//if (msm_batt_info.battery_level>=3660){
 				msm_batt_info.batt_capacity = 100;	
 				msm_batt_info.batt_status = POWER_SUPPLY_STATUS_FULL;
 				msm_batt_info.batt_health = POWER_SUPPLY_HEALTH_GOOD;				
 				msm_batt_info.charger_status = CHARGER_STATUS_GOOD;	
 				charging_control(SMEM_PROC_COMM_CHARGING_OFF);
-}
+//}
 				break;
 				
 			case CHARGING_STATE_TA_FULL_RECHARGING:
-				if (msm_batt_info.battery_level<=3600){
+				if (msm_batt_info.battery_level>=355000){
 				msm_batt_info.batt_capacity = 100;	
 				msm_batt_info.batt_status = POWER_SUPPLY_STATUS_FULL;
 }
@@ -1861,7 +1862,7 @@ if (msm_batt_info.battery_level>=3800){
 				break;
 				
 			case CHARGING_STATE_USB_FULL_RECHARGING:
-if (msm_batt_info.battery_level<=3600){
+if (msm_batt_info.battery_level>=360000){
 				msm_batt_info.batt_capacity = 100;	
 				msm_batt_info.batt_status = POWER_SUPPLY_STATUS_FULL;
 }
@@ -2076,18 +2077,18 @@ void msm_batt_check_event(struct work_struct *work)
 	valor1=get_batt_info();
 	
 	printk("[Battery] %s : scaled_level %d\n", __func__, valor1);
-	mdelay(10);
+	//mdelay(10);
 	//wait_event_interruptible_timeout(msm_batt_info.wait_q,0,msecs_to_jiffies(2000));
 	
 	
-	valor2=get_batt_info();
+	//valor2=get_batt_info();
 	//printk("[Battery] %s : scaled_level %d\n", __func__, valor2);
-	mdelay(10);
+	//mdelay(10);
 	//wait_event_interruptible_timeout(msm_batt_info.wait_q,0, msecs_to_jiffies(2000));
 	valor3=get_batt_info();
 	printk("[Battery] %s : scaled_level %d\n", __func__, valor3);
 	
-	msm_batt_info.batt_capacity=((valor1*valor3)+(valor2>>1))/valor2;
+	//msm_batt_info.batt_capacity=((valor1*valor3)+(valor2>>1))/valor2;
 
 	
 	
@@ -2939,7 +2940,7 @@ static void msm_batt_wait_for_batt_chg_event(struct work_struct *work)
 
 		rpc_packet_type = be32_to_cpu(req->type);
 
-		if (rpc_packet_type == RPC_TYPE_REPLY) {
+		//if (rpc_packet_type == RPC_TYPE_REPLY) {
 
 			if (msm_batt_info.type_of_event &
 				(SUSPEND_EVENT | RESUME_EVENT)) {
@@ -2950,13 +2951,16 @@ static void msm_batt_wait_for_batt_chg_event(struct work_struct *work)
 						SUSPEND_EVENT | RESUME_EVENT);
 
 			} else {
+				
+				msm_batt_handle_vbatt_rpc_reply(rpc_packet);
+				
 				printk(KERN_ERR "%s: Should not get rpc reply"
 					" Type_of_packet = %d\n", __func__,
 					rpc_packet_type);
 				kfree(rpc_packet);
 			}
 			continue;
-		}
+		//}
 		if (rpc_packet_type != RPC_TYPE_REQ) {
 			printk(KERN_ERR "%s: Type_of_packet is neither req or"
 			       " reply. Type_of_packet = %d\n",
@@ -3014,15 +3018,10 @@ static void msm_batt_wait_for_batt_chg_event(struct work_struct *work)
 
 		printk(KERN_INFO "%s: Update Batt status.\n", __func__);
 
-		if (msm_batt_info.chg_api_version >= CHARGER_API_VERSION){
-//wake_lock(&vbus_wake_lock);			
-msm_batt_update_psy_status_v1();
-//wake_unlock(&vbus_wake_lock);
-}
+if (msm_batt_info.chg_api_version >= CHARGER_API_VERSION)
+			msm_batt_update_psy_status_v1();
 		else
-//			wake_lock(&vbus_wake_lock);			
-msm_batt_update_psy_status_v0();
-//wake_unlock(&vbus_wake_lock);
+			msm_batt_update_psy_status_v0();
 	}
 
 	printk(KERN_INFO "%s: Batt RPC call back thread stopped.\n", __func__);

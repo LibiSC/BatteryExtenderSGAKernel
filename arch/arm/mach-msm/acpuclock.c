@@ -236,13 +236,28 @@ static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_800[] = {
 	{ 1, 200000, ACPU_PLL_2, 2, 3,  66667, 2, 2,  61440 },
 	{ 1, 245760, ACPU_PLL_1, 1, 0, 122880, 1, 2,  61440 },
 	{ 1, 320000, ACPU_PLL_0, 4, 2, 160000, 1, 3, 122880 },
+	#ifdef CONFIG_MSM_CPU_FREQ_OVERCLOCK_800
+	{ 0, 396800, ACPU_PLL_2, 2, 1, 198400, 1, 5, 122880 },
+	{ 1, 480000, ACPU_PLL_0, 4, 1, 240000, 1, 6, 122880 },
+	{ 1, 787200, ACPU_PLL_2, 2, 0, 262400, 2, 7, 122880 },
+	{ 1, 806400, ACPU_PLL_2, 2, 0, 268800, 2, 7, 122880 },
+	{ 1, 825600, ACPU_PLL_2, 2, 0, 275200, 2, 7, 122880 },
+	{ 1, 844800, ACPU_PLL_2, 2, 0, 281600, 2, 7, 122880 },
+	{ 1, 864000, ACPU_PLL_2, 2, 0, 288000, 2, 7, 122880 },
+	{ 1, 883200, ACPU_PLL_2, 2, 0, 294400, 2, 7, 122880 },
+	{ 1, 902400, ACPU_PLL_2, 2, 0, 300800, 2, 7, 122880 },
+	{ 1, 921600, ACPU_PLL_2, 2, 0, 307200, 2, 7, 122880 },
+	{ 1, 940800, ACPU_PLL_2, 2, 0, 313600, 2, 7, 122880 },
+	{ 1, 960000, ACPU_PLL_2, 2, 0, 320000, 2, 7, 122880 },
+#else
 	{ 0, 400000, ACPU_PLL_2, 2, 1, 133333, 2, 4, 122880 },
 	{ 1, 480000, ACPU_PLL_0, 4, 1, 160000, 2, 5, 122880 },
 	{ 1, 614400, ACPU_PLL_2, 2, 0, 153600, 3, 6, 122880 },
 	{ 1, 672000, ACPU_PLL_2, 2, 0, 168000, 3, 6, 122880 },
-	{ 1, 729600, ACPU_PLL_2, 2, 0, 182400, 3, 7, 122880 },
-	{ 1, 768000, ACPU_PLL_2, 2, 0, 192000, 3, 7, 122880 },
-	{ 1, 800000, ACPU_PLL_2, 2, 0, 200000, 3, 7, 122880 },
+	{ 1, 729600, ACPU_PLL_2, 2, 0, 320000, 3, 7, 200000 },
+	{ 1, 768000, ACPU_PLL_2, 2, 0, 320000, 3, 7, 200000 },
+	{ 1, 800000, ACPU_PLL_2, 2, 0, 320000, 3, 7, 200000 },
+#endif
 	{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0}, {0, 0, 0} }
 };
 
@@ -444,7 +459,14 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 		reg_clksel |= (hunt_s->ahbclk_div << 1);
 		writel(reg_clksel, A11S_CLK_SEL_ADDR);
 	}
-
+#ifdef CONFIG_MSM_CPU_FREQ_OVERCLOCK_800
+	// Perform overclocking if requested
+	if(hunt_s->a11clk_khz>787200) {
+		// Change the speed of PLL2
+		writel(hunt_s->a11clk_khz/19200, PLLn_L_VAL(2));
+		udelay(50);
+	}
+#endif
 	/* Program clock source and divider */
 	reg_clkctl = readl(A11S_CLK_CNTL_ADDR);
 	reg_clkctl &= ~(0xFF << (8 * src_sel));
@@ -456,6 +478,14 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 	reg_clksel ^= 1;
 	writel(reg_clksel, A11S_CLK_SEL_ADDR);
 
+#ifdef CONFIG_MSM_CPU_FREQ_OVERCLOCK_800
+	// Recover from overclocking
+	if(hunt_s->a11clk_khz<=787200) {
+		// Restore the speed of PLL2
+		writel(PLL_800_MHZ, PLLn_L_VAL(2));
+		udelay(50);
+	}
+#endif
 	/*
 	 * If the new clock divider is lower than the previous, then
 	 * program the divider after switching the clock
@@ -786,11 +816,11 @@ static void __init acpu_freq_tbl_fixup(void)
 			t->axiclk_khz = 160000;
 		if (axi_200mhz && drv_state.max_axi_khz >= 200000
 		    && t->ahbclk_khz > 160000)
-			t->axiclk_khz = 200000;
+			t->axiclk_khz = 200000; 
 	}
 
 	t--;
-	drv_state.max_axi_khz = t->axiclk_khz;
+	drv_state.max_axi_khz = 422400;
 
 	/* The default 7x27 ACPU clock plan supports running the AXI bus at
 	 * 200 MHz. So we don't classify it as Turbo mode.

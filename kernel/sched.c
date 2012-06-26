@@ -3933,7 +3933,7 @@ void complete_all(struct completion *x)
 EXPORT_SYMBOL(complete_all);
 
 static inline long __sched
-do_wait_for_common(struct completion *x, long timeout, int state, int iowait)
+do_wait_for_common(struct completion *x, long timeout, int state)
 {
 	if (!x->done) {
 		DECLARE_WAITQUEUE(wait, current);
@@ -3946,10 +3946,7 @@ do_wait_for_common(struct completion *x, long timeout, int state, int iowait)
 			}
 			__set_current_state(state);
 			spin_unlock_irq(&x->wait.lock);
-			if (iowait)
-				timeout = io_schedule_timeout(timeout);
-			else
-				timeout = schedule_timeout(timeout);
+			timeout = schedule_timeout(timeout);
 			spin_lock_irq(&x->wait.lock);
 		} while (!x->done && timeout);
 		__remove_wait_queue(&x->wait, &wait);
@@ -3961,12 +3958,12 @@ do_wait_for_common(struct completion *x, long timeout, int state, int iowait)
 }
 
 static long __sched
-wait_for_common(struct completion *x, long timeout, int state, int iowait)
+wait_for_common(struct completion *x, long timeout, int state)
 {
 	might_sleep();
 
 	spin_lock_irq(&x->wait.lock);
-	timeout = do_wait_for_common(x, timeout, state, iowait);
+	timeout = do_wait_for_common(x, timeout, state);
 	spin_unlock_irq(&x->wait.lock);
 	return timeout;
 }
@@ -3983,7 +3980,7 @@ wait_for_common(struct completion *x, long timeout, int state, int iowait)
  */
 void __sched wait_for_completion(struct completion *x)
 {
-	wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_UNINTERRUPTIBLE, 0);
+	wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_UNINTERRUPTIBLE);
 }
 EXPORT_SYMBOL(wait_for_completion);
 
@@ -3996,7 +3993,7 @@ EXPORT_SYMBOL(wait_for_completion);
  */
 void __sched wait_for_completion_io(struct completion *x)
 {
-	wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_UNINTERRUPTIBLE, 1);
+	wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_UNINTERRUPTIBLE);
 }
 EXPORT_SYMBOL(wait_for_completion_io);
 
@@ -4012,7 +4009,7 @@ EXPORT_SYMBOL(wait_for_completion_io);
 unsigned long __sched
 wait_for_completion_timeout(struct completion *x, unsigned long timeout)
 {
-	return wait_for_common(x, timeout, TASK_UNINTERRUPTIBLE, 0);
+	return wait_for_common(x, timeout, TASK_UNINTERRUPTIBLE);
 }
 EXPORT_SYMBOL(wait_for_completion_timeout);
 
@@ -4025,8 +4022,8 @@ EXPORT_SYMBOL(wait_for_completion_timeout);
  */
 int __sched wait_for_completion_interruptible(struct completion *x)
 {
-	long t =
-	  wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_INTERRUPTIBLE, 0);
+	
+	  long t = wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_INTERRUPTIBLE);
 	if (t == -ERESTARTSYS)
 		return t;
 	return 0;
@@ -4045,7 +4042,7 @@ unsigned long __sched
 wait_for_completion_interruptible_timeout(struct completion *x,
 					  unsigned long timeout)
 {
-	return wait_for_common(x, timeout, TASK_INTERRUPTIBLE, 0);
+	return wait_for_common(x, timeout, TASK_INTERRUPTIBLE);
 }
 EXPORT_SYMBOL(wait_for_completion_interruptible_timeout);
 
@@ -4058,7 +4055,7 @@ EXPORT_SYMBOL(wait_for_completion_interruptible_timeout);
  */
 int __sched wait_for_completion_killable(struct completion *x)
 {
-	long t = wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_KILLABLE, 0);
+	long t = wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_KILLABLE);
 	if (t == -ERESTARTSYS)
 		return t;
 	return 0;
@@ -4078,7 +4075,7 @@ unsigned long __sched
 wait_for_completion_killable_timeout(struct completion *x,
 				     unsigned long timeout)
 {
-	return wait_for_common(x, timeout, TASK_KILLABLE, 0);
+	return wait_for_common(x, timeout, TASK_KILLABLE);
 }
 EXPORT_SYMBOL(wait_for_completion_killable_timeout);
 
