@@ -1,0 +1,1 @@
+cmd_drivers/hid/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/hid/built-in.o drivers/hid/hid.o drivers/hid/usbhid/built-in.o 

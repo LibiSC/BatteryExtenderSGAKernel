@@ -1,0 +1,1 @@
+cmd_drivers/switch/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/switch/built-in.o drivers/switch/switch_class.o drivers/switch/switch_gpio.o 

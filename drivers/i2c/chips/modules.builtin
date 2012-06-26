@@ -1,0 +1,6 @@
+kernel/drivers/i2c/chips/bma023_dev.ko
+kernel/drivers/i2c/chips/bma_accel_driver.ko
+kernel/drivers/i2c/chips/bma222.ko
+kernel/drivers/i2c/chips/mmc31xx.ko
+kernel/drivers/i2c/chips/mecs.ko
+kernel/drivers/i2c/chips/taos.ko

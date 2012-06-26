@@ -1,0 +1,4 @@
+  CHK     include/linux/version.h
+  CHK     include/generated/utsrelease.h
+make[1]: «include/generated/mach-types.h» está actualizado.
+  CC      arch/arm/kernel/asm-offsets.s

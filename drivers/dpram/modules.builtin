@@ -1,0 +1,2 @@
+kernel/drivers/dpram/dpram.ko
+kernel/drivers/dpram/multipdp.ko

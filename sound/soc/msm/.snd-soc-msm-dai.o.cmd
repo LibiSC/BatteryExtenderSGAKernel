@@ -1,0 +1,1 @@
+cmd_sound/soc/msm/snd-soc-msm-dai.o := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o sound/soc/msm/snd-soc-msm-dai.o sound/soc/msm/msm-dai.o 

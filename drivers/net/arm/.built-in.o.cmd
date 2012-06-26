@@ -1,0 +1,1 @@
+cmd_drivers/net/arm/built-in.o :=  rm -f drivers/net/arm/built-in.o; /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ar rcs drivers/net/arm/built-in.o

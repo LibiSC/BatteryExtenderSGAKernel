@@ -1,0 +1,1 @@
+cmd_drivers/md/dm-multipath.o := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/md/dm-multipath.o drivers/md/dm-path-selector.o drivers/md/dm-mpath.o 

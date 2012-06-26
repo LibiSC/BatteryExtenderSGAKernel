@@ -1,0 +1,1 @@
+cmd_drivers/net/wireless/libra/librasdioif.o := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/net/wireless/libra/librasdioif.o drivers/net/wireless/libra/libra_sdioif.o drivers/net/wireless/libra/qcomwlan_pwrif.o 

@@ -1,0 +1,4 @@
+kernel/drivers/usb/class/cdc-acm.ko
+kernel/drivers/usb/core/usbcore.ko
+kernel/drivers/usb/host/ehci-hcd.ko
+kernel/drivers/usb/misc/ehset.ko

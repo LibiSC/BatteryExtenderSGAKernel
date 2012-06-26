@@ -1,0 +1,1 @@
+cmd_drivers/char/diag/diagchar.o := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/char/diag/diagchar.o drivers/char/diag/diagchar_core.o drivers/char/diag/diagchar_hdlc.o drivers/char/diag/diagfwd.o drivers/char/diag/diagmem.o 

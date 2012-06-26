@@ -1,0 +1,2 @@
+kernel/drivers/gpu/drm/drm.ko
+kernel/drivers/gpu/msm/msm_kgsl.ko

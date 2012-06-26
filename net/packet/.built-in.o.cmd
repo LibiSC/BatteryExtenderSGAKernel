@@ -1,0 +1,1 @@
+cmd_net/packet/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o net/packet/built-in.o net/packet/af_packet.o 

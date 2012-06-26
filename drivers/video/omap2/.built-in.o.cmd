@@ -1,0 +1,1 @@
+cmd_drivers/video/omap2/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/video/omap2/built-in.o drivers/video/omap2/dss/built-in.o drivers/video/omap2/omapfb/built-in.o drivers/video/omap2/displays/built-in.o 

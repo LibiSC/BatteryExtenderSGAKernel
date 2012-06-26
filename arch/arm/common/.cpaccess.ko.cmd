@@ -1,0 +1,1 @@
+cmd_arch/arm/common/cpaccess.ko := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL -r  -T /home/carlos/android/BatteryExtenderSGAKernel/scripts/module-common.lds --build-id -o arch/arm/common/cpaccess.ko arch/arm/common/cpaccess.o arch/arm/common/cpaccess.mod.o

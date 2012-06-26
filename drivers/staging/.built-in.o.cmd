@@ -1,0 +1,1 @@
+cmd_drivers/staging/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/staging/built-in.o drivers/staging/staging.o drivers/staging/android/built-in.o 
