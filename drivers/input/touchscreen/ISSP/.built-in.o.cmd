@@ -1,1 +1,0 @@
-cmd_drivers/input/touchscreen/ISSP/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/input/touchscreen/ISSP/built-in.o drivers/input/touchscreen/ISSP/TouchUpdater.o drivers/input/touchscreen/ISSP/issp_driver_routines.o drivers/input/touchscreen/ISSP/issp_routines.o 

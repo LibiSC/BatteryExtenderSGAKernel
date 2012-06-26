@@ -1,1 +1,0 @@
-cmd_drivers/idle/built-in.o :=  rm -f drivers/idle/built-in.o; /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ar rcs drivers/idle/built-in.o

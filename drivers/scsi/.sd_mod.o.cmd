@@ -1,1 +1,0 @@
-cmd_drivers/scsi/sd_mod.o := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/scsi/sd_mod.o drivers/scsi/sd.o 

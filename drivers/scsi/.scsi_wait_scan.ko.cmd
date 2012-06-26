@@ -1,1 +1,0 @@
-cmd_drivers/scsi/scsi_wait_scan.ko := /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL -r  -T /home/carlos/android/BatteryExtenderSGAKernel/scripts/module-common.lds --build-id -o drivers/scsi/scsi_wait_scan.ko drivers/scsi/scsi_wait_scan.o drivers/scsi/scsi_wait_scan.mod.o

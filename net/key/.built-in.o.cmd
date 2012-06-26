@@ -1,1 +1,0 @@
-cmd_net/key/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o net/key/built-in.o net/key/af_key.o 

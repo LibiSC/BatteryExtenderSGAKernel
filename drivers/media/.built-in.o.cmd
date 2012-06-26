@@ -1,1 +1,0 @@
-cmd_drivers/media/built-in.o :=  /home/carlos/android/android-ndk-r7c/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-ld -EL    -r -o drivers/media/built-in.o drivers/media/common/built-in.o drivers/media/IR/built-in.o drivers/media/video/built-in.o drivers/media/radio/built-in.o 
